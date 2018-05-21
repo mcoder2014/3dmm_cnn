@@ -7,8 +7,8 @@
 # Please, cite the paper:
 # @article{tran16_3dmm_cnn,
 #   title={Regressing Robust and Discriminative {3D} Morphable Models with a very Deep Neural Network},
-#   author={Anh Tran 
-#       and Tal Hassner 
+#   author={Anh Tran
+#       and Tal Hassner
 #       and Iacopo Masi
 #       and G\'{e}rard Medioni}
 #   journal={arXiv preprint},
@@ -19,7 +19,7 @@
 import os
 ## Tu suppress the noise output of Caffe when loading a model
 ## polish the output (see http://stackoverflow.com/questions/29788075/setting-glog-minloglevel-1-to-prevent-output-in-shell-from-caffe)
-os.environ['GLOG_minloglevel'] = '2' 
+os.environ['GLOG_minloglevel'] = '2'
 os.environ["CUDA_VISIBLE_DEVICES"]='0'
 ###################
 import numpy as np
@@ -45,7 +45,7 @@ model_path  = '../CNN/3dmm_cnn_resnet_101.caffemodel'
 mean_path = '../CNN/mean.binaryproto'
 layer_name      = 'fc_ftnew'
 #GPU ID we want to use
-GPU_ID = 0	
+GPU_ID = 0
 ## Modifed Basel Face Model
 BFM_path = '../3DMM_model/BaselFaceModel_mod.mat'
 ## CNN template size
@@ -123,11 +123,11 @@ with open(fileList, "r") as ins:
 
 	img = cv2.resize(img,(trg_size, trg_size))
 	cv2.imwrite("tmp_ims/" + imname + ".png",img)
-#####CNN fitting ############################## 
+#####CNN fitting ##############################
 start_time = time.time()
 
 # load net
-try: 
+try:
 	caffe.set_mode_gpu()
 	caffe.set_device(GPU_ID)
 except Exception as ex:
