@@ -51,6 +51,7 @@ def prepareImage(imagePath):
     if needCrop:
         dlib_img = io.imread(imagePath)
         img2 = cv2.copyMakeBorder(img,0,0,0,0,cv2.BORDER_REPLICATE)
+        detector = dlib.get_frontal_face_detector()
         predictor = dlib.shape_predictor(FLAGS.predictor_path)  # 加载 dlib 检测
         dets = detector(img, 1)
         print(">     Number of faces detected: {}".format(len(dets)))
@@ -142,7 +143,7 @@ def cnn_3dmm( img, outputPath ):
     ## Basel Face Model (Shape)
     ##################################
     S,T = utils.projectBackBFM(model, features)
-    print '> Writing 3D file in: ', outFile + '.ply'
+    print '> Writing 3D file in: ', os.path.join( outputPath, imname+ '.ply')
     utils.write_ply(os.path.join( outputPath, imname+ '.ply'), S, T, faces)
 
 def main():
@@ -150,37 +151,37 @@ def main():
     """
 
     # 检查图片文件夹是否存在
-    if not os.path.exists(FLAGS.path):
+    if not os.path.exists(FLAGS.imagePath):
         print("Floder {0} seems to be not existed.".format(FLAGS.path))
         return
 
     # 检查输出文件夹是否存在
-    if not os.path.exists(FLAGS.outputPath):
-        os.makedirs(FLAGS.outputPath)
+    if not os.path.exists(FLAGS.savePath):
+        os.makedirs(FLAGS.savePath)
 
     # 检查临时文件夹
     if not os.path.exists(FLAGS.tmp_ims):
         os.makedirs(FLAGS.tmp_ims)
 
     if needCrop:
-    	detector = dlib.get_frontal_face_detector()
-    	if not os.path.exists(FLAGS.tmp_detect):
-    		# shutil.rmtree('tmp_detect')
-    	    os.makedirs(FLAGS.tmp_detect)
+        detector = dlib.get_frontal_face_detector()
+        if not os.path.exists(FLAGS.tmp_detect):
+            # shutil.rmtree('tmp_detect')
+            os.makedirs(FLAGS.tmp_detect)
 
-    output_dir = os.path.abspath(FLAGS.outputPath)
+    output_dir = os.path.abspath(FLAGS.savePath)
     image_path = os.path.abspath(FLAGS.imagePath)
     print("imagePath:{0}, outpath:{1}".format(image_path, output_dir))
 
     start_time = time.time()
     img = prepareImage(image_path)  # prepare Image
-    if img == None:
+    if img is None:
         print("Did not detected face ")
         exit()
     cnn_3dmm(img, output_dir)
 
-    print("Cost time {0} Sec, process {1} images.".format(
-        time.time() - start_time, count_image))
+    print("Cost time {0} Sec.".format(
+        time.time() - start_time))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
