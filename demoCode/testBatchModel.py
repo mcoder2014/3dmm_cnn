@@ -20,6 +20,7 @@ import os
 ## Tu suppress the noise output of Caffe when loading a model
 ## polish the output (see http://stackoverflow.com/questions/29788075/setting-glog-minloglevel-1-to-prevent-output-in-shell-from-caffe)
 os.environ['GLOG_minloglevel'] = '2' 
+os.environ["CUDA_VISIBLE_DEVICES"]='0'
 ###################
 import numpy as np
 from PIL import Image
@@ -123,6 +124,7 @@ with open(fileList, "r") as ins:
 	img = cv2.resize(img,(trg_size, trg_size))
 	cv2.imwrite("tmp_ims/" + imname + ".png",img)
 #####CNN fitting ############################## 
+start_time = time.time()
 
 # load net
 try: 
@@ -154,6 +156,7 @@ print '> Loaded the Basel Face Model to write the 3D output!'
 count = 0
 listImgs = glob("tmp_ims/*.png")
 for image_path in listImgs:
+	start_each_image = time.time()
 	count = count + 1
 	fig_name = ntpath.basename(image_path)
 	outFile = data_out + "/" + fig_name[:-4]
@@ -174,5 +177,8 @@ for image_path in listImgs:
 	## Basel Face Model (Shape)
 	##################################
 	S,T = utils.projectBackBFM(model,features)
-	print '> Writing 3D file in: ', outFile + '.ply'
+	print '> Writing 3D file in: ', outFile + '.ply' + 'cost {0}s.'.format(time.time()-start_each_image)
 	utils.write_ply(outFile + '.ply', S, T, faces)
+
+end_time = time.time()
+print "Costtime{0}s".format(end_time - start_time)
