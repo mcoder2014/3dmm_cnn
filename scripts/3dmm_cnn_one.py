@@ -6,6 +6,11 @@ Time: 2018-05-21
 """
 
 import os
+import sys
+
+sys.path.append("/home/chaoqun/github/caffe/python")
+sys.path.append("/home/chaoqun/github/caffe/python/caffe")
+
 ## Tu suppress the noise output of Caffe when loading a model
 ## polish the output (see http://stackoverflow.com/questions/29788075/setting-glog-minloglevel-1-to-prevent-output-in-shell-from-caffe)
 os.environ['GLOG_minloglevel'] = '2'
@@ -21,7 +26,6 @@ import ntpath
 import os.path
 import scipy.io
 import shutil
-import sys
 from skimage import io
 import dlib
 import utils
@@ -37,7 +41,7 @@ trg_size = 224
 needCrop = 1                #  tells the demo if the images need cropping (1) or not (0).
 # Default 1. If your input image size is equal (square) and has a CASIA-like [2] bounding box,
 #  you can set <needCrop> as 0. Otherwise, you have to set it as 1.
-useLM    = 1                #  is an option to refine the bounding box
+useLM    = 0                #  is an option to refine the bounding box
                             # using detected landmarks (1) or not (0). Default 1.
 
 def prepareImage(imagePath):
@@ -121,8 +125,12 @@ def cnn_3dmm( img, outputPath ):
     print '> Loaded the Basel Face Model to write the 3D output!'
 
     net.blobs['data'].reshape(1,3,trg_size,trg_size)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    im = img / 255
+   # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+   # im = img / 255
+    imname = ntpath.basename(FLAGS.imagePath)
+    imname = imname.split(imname.split('.')[-1])[0][0:-1]       # 记录图片basename
+
+    im = caffe.io.load_image(os.path.join(FLAGS.tmp_ims, imname + '.png'))
 
     ## Transforming the image into the right format
     net.blobs['data'].data[...] = transformer.preprocess('data', im)
@@ -131,8 +139,8 @@ def cnn_3dmm( img, outputPath ):
     ## Getting the output
     features = np.hstack( [net.blobs[layer_name].data[0].flatten()] )
 
-    imname = ntpath.basename(FLAGS.imagePath)
-    imname = imname.split(imname.split('.')[-1])[0][0:-1]       # 记录图片basename
+    #imname = ntpath.basename(FLAGS.imagePath)
+    #imname = imname.split(imname.split('.')[-1])[0][0:-1]       # 记录图片basename
 
     ## Writing the regressed 3DMM parameters
     np.savetxt(os.path.join( outputPath, imname+ '.ply.alpha'), features[0:99])
